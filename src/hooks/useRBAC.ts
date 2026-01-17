@@ -58,8 +58,8 @@ export function useRBAC() {
 export function withPermission<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   requiredPermission: Permission
-) {
-  return function PermissionGate(props: P) {
+): React.FC<P> {
+  const PermissionGatedComponent: React.FC<P> = (props: P) => {
     const { hasPermission, isLoading } = useRBAC()
 
     if (isLoading) {
@@ -70,8 +70,11 @@ export function withPermission<P extends object>(
       return null // Or an unauthorized message
     }
 
-    return <WrappedComponent {...props} />
+    const Component = WrappedComponent
+    return <Component {...props} />
   }
+
+  return PermissionGatedComponent
 }
 
 /**
