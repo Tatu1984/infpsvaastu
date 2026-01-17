@@ -1,67 +1,14 @@
 import { NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma"
 
-// This endpoint creates an admin user for initial setup
-// It should be disabled or removed in production
+// This endpoint only checks if admin exists - no creation allowed via API
+// Admin creation should only be done via CLI: npm run create-admin
 export async function POST() {
-  try {
-    const email = "admin@infpsvaastu.com"
-    const password = "admin123"
-    const name = "Admin User"
-
-    // Check if admin already exists
-    const existingAdmin = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (existingAdmin) {
-      // Update password in case it was changed
-      const hashedPassword = await bcrypt.hash(password, 12)
-      await prisma.user.update({
-        where: { email },
-        data: {
-          password: hashedPassword,
-          userType: "ADMIN",
-          isVerified: true,
-          isActive: true,
-        }
-      })
-
-      return NextResponse.json({
-        message: "Admin user already exists. Password has been reset.",
-        email,
-        password,
-      })
-    }
-
-    // Create new admin user
-    const hashedPassword = await bcrypt.hash(password, 12)
-    const admin = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        userType: "ADMIN",
-        isVerified: true,
-        isActive: true,
-      }
-    })
-
-    return NextResponse.json({
-      message: "Admin user created successfully!",
-      email,
-      password,
-      userId: admin.id,
-    }, { status: 201 })
-
-  } catch (error) {
-    console.error("Error creating admin:", error)
-    return NextResponse.json(
-      { error: "Failed to create admin user", details: String(error) },
-      { status: 500 }
-    )
-  }
+  // Disabled in production for security
+  return NextResponse.json(
+    { error: "Admin creation via API is disabled. Use CLI: npm run create-admin" },
+    { status: 403 }
+  )
 }
 
 // GET endpoint to check if admin exists

@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Privacy Policy | PropEstate",
-  description: "PropEstate privacy policy - How we collect, use, and protect your data",
+  title: "Privacy Policy | INFPSVaastu",
+  description: "INFPSVaastu privacy policy - How we collect, use, and protect your data",
 }
 
 export default function PrivacyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Introduction</h2>
             <p className="text-gray-600">
-              PropEstate ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy
+              INFPSVaastu ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy
               explains how we collect, use, disclose, and safeguard your information when you visit our website
               and use our services.
             </p>
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
             </p>
             <p className="text-gray-600 mt-2">
               <strong>Email:</strong> privacy@propestate.com<br />
-              <strong>Address:</strong> PropEstate, Mumbai, India
+              <strong>Address:</strong> INFPSVaastu, Mumbai, India
             </p>
           </section>
         </div>

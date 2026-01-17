@@ -20,7 +20,7 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [settings, setSettings] = useState<Record<string, string>>({
-    site_name: "PropEstate",
+    site_name: "INFPSVaastu",
     site_description: "Find Your Dream Home",
     contact_email: "contact@propestate.com",
     contact_phone: "+91 9876543210",

@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard - PropEstate",
-  description: "PropEstate Admin Dashboard - Manage properties, users, and settings",
+  title: "Admin Dashboard - INFPSVaastu",
+  description: "INFPSVaastu Admin Dashboard - Manage properties, users, and settings",
 }
 
 export default function AdminLayout({

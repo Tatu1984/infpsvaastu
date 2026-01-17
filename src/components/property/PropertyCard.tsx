@@ -6,8 +6,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Heart, MapPin, Bed, Bath, Maximize, Eye, CheckCircle, Compass } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { formatPrice, formatArea } from "@/lib/utils"
-import { cn } from "@/lib/utils"
+import { formatPrice, formatArea, safeJsonParse, cn } from "@/lib/utils"
 
 interface PropertyCardProps {
   property: {
@@ -33,7 +32,7 @@ interface PropertyCardProps {
 export default function PropertyCard({ property, variant = "default" }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(false)
   const [imageError, setImageError] = useState(false)
-  const images = property.images ? JSON.parse(property.images) : []
+  const images = safeJsonParse<string[]>(property.images, [])
   const mainImage = images[0] || "/placeholder-property.jpg"
 
   const handleLike = (e: React.MouseEvent) => {

@@ -112,7 +112,7 @@ export function RazorpayButton({
         key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'PropEstate',
+        name: 'INFPSVaastu',
         description: type === 'membership' ? 'Membership Purchase' : 'Listing Upgrade',
         order_id: orderData.orderId,
         prefill: orderData.prefill,

@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Terms of Service | PropEstate",
-  description: "PropEstate terms of service - Rules and guidelines for using our platform",
+  title: "Terms of Service | INFPSVaastu",
+  description: "INFPSVaastu terms of service - Rules and guidelines for using our platform",
 }
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
             <p className="text-gray-600">
-              By accessing and using PropEstate ("the Service"), you agree to be bound by these Terms of Service.
+              By accessing and using INFPSVaastu ("the Service"), you agree to be bound by these Terms of Service.
               If you do not agree to these terms, please do not use our Service.
             </p>
           </section>
@@ -22,7 +22,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. Description of Service</h2>
             <p className="text-gray-600">
-              PropEstate is an online real estate marketplace that connects property buyers, sellers, renters,
+              INFPSVaastu is an online real estate marketplace that connects property buyers, sellers, renters,
               landlords, agents, and builders. We provide a platform for listing and searching properties,
               but we are not a party to any transactions between users.
             </p>
@@ -77,7 +77,7 @@ export default function TermsPage() {
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Disclaimer of Warranties</h2>
             <p className="text-gray-600">
               The Service is provided "as is" without warranties of any kind. We do not guarantee the accuracy
-              of property listings or the conduct of other users. PropEstate is not responsible for any
+              of property listings or the conduct of other users. INFPSVaastu is not responsible for any
               transactions between users.
             </p>
           </section>
@@ -85,7 +85,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Limitation of Liability</h2>
             <p className="text-gray-600">
-              To the maximum extent permitted by law, PropEstate shall not be liable for any indirect,
+              To the maximum extent permitted by law, INFPSVaastu shall not be liable for any indirect,
               incidental, special, consequential, or punitive damages arising from your use of the Service.
             </p>
           </section>
@@ -93,7 +93,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">9. Indemnification</h2>
             <p className="text-gray-600">
-              You agree to indemnify and hold harmless PropEstate and its affiliates from any claims,
+              You agree to indemnify and hold harmless INFPSVaastu and its affiliates from any claims,
               damages, or expenses arising from your use of the Service or violation of these Terms.
             </p>
           </section>
@@ -129,7 +129,7 @@ export default function TermsPage() {
             </p>
             <p className="text-gray-600 mt-2">
               <strong>Email:</strong> legal@propestate.com<br />
-              <strong>Address:</strong> PropEstate, Mumbai, India
+              <strong>Address:</strong> INFPSVaastu, Mumbai, India
             </p>
           </section>
         </div>

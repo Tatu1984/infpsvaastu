@@ -9,7 +9,7 @@ const faqs = [
     category: "Buying Property",
     questions: [
       {
-        q: "How do I search for properties on PropEstate?",
+        q: "How do I search for properties on INFPSVaastu?",
         a: "Use our search bar on the homepage or search page. You can filter by location, property type, budget, and more. Our advanced filters help you find exactly what you're looking for.",
       },
       {
@@ -30,7 +30,7 @@ const faqs = [
     category: "Selling/Renting Property",
     questions: [
       {
-        q: "How do I list my property on PropEstate?",
+        q: "How do I list my property on INFPSVaastu?",
         a: "Register on our platform, go to your dashboard, and click 'Post Property'. Fill in the details, upload photos, and submit. Your listing will be live after review.",
       },
       {
@@ -110,7 +110,7 @@ export default function FAQPage() {
           <HelpCircle className="w-12 h-12 mx-auto mb-4 opacity-80" />
           <h1 className="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h1>
           <p className="mt-4 text-lg text-purple-100">
-            Find answers to common questions about buying, selling, and renting properties on PropEstate.
+            Find answers to common questions about buying, selling, and renting properties on INFPSVaastu.
           </p>
           {/* Search */}
           <div className="mt-8 relative max-w-xl mx-auto">

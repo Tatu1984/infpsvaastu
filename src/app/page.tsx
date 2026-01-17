@@ -1,4 +1,16 @@
+import type { Metadata } from "next"
 import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "INFPSVaastu - Find Your Perfect Vastu-Compliant Home",
+  description: "Discover Vastu-compliant properties for sale and rent across India. Browse apartments, houses, villas, and commercial spaces with verified listings.",
+  keywords: ["real estate", "property", "vastu", "homes for sale", "rent property", "India"],
+  openGraph: {
+    title: "INFPSVaastu - Find Your Perfect Vastu-Compliant Home",
+    description: "Discover Vastu-compliant properties for sale and rent across India.",
+    type: "website",
+  },
+}
 import Image from "next/image"
 import {
   Building2,

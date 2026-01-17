@@ -317,7 +317,7 @@ export default function AdminDashboard() {
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-white font-bold text-lg tracking-tight">PropEstate</h1>
+              <h1 className="text-white font-bold text-lg tracking-tight">INFPSVaastu</h1>
               <p className="text-slate-400 text-xs">Admin Dashboard</p>
             </div>
           </div>

@@ -192,7 +192,7 @@ export default function AdminLayout({ children, title, breadcrumbs = [] }: Admin
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-white font-bold text-lg">PropEstate Admin</h1>
+              <h1 className="text-white font-bold text-lg">INFPSVaastu Admin</h1>
             </div>
           </Link>
         </div>

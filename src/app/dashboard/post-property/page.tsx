@@ -170,7 +170,7 @@ export default function PostPropertyPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Post Your Property</h1>
           <p className="text-gray-600 mt-1">
-            Fill in the details to list your property on PropEstate
+            Fill in the details to list your property on INFPSVaastu
           </p>
         </div>
 

@@ -1,8 +1,8 @@
 import { Building2, Users, Shield, Award, Target, Heart } from "lucide-react"
 
 export const metadata = {
-  title: "About Us | PropEstate",
-  description: "Learn about PropEstate - India's trusted real estate marketplace",
+  title: "About Us | INFPSVaastu",
+  description: "Learn about INFPSVaastu - India's trusted real estate marketplace",
 }
 
 export default function AboutPage() {
@@ -36,7 +36,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">About PropEstate</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">About INFPSVaastu</h1>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto">
             India's most trusted real estate marketplace, connecting buyers, sellers, and agents
             to make property transactions simple, transparent, and secure.
@@ -65,7 +65,7 @@ export default function AboutPage() {
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
               <p className="text-gray-600 mb-4">
-                At PropEstate, we believe everyone deserves to find their perfect home. Our mission
+                At INFPSVaastu, we believe everyone deserves to find their perfect home. Our mission
                 is to simplify the real estate journey by providing a platform that connects people
                 with the right properties and professionals.
               </p>
@@ -75,7 +75,7 @@ export default function AboutPage() {
               </p>
               <p className="text-gray-600">
                 Whether you're buying your first home, selling a property, or looking for rental
-                accommodation, PropEstate is your trusted partner throughout the process.
+                accommodation, INFPSVaastu is your trusted partner throughout the process.
               </p>
             </div>
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 text-white">
