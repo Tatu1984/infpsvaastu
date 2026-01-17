@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, ReactNode } from "react"
 import { useSession } from "next-auth/react"
 import { RBAC, createRBAC, type Permission, type Role } from "@/lib/rbac"
 
@@ -81,8 +81,8 @@ interface PermissionGateProps {
   permission?: Permission
   permissions?: Permission[]
   requireAll?: boolean
-  fallback?: React.ReactNode
-  children: React.ReactNode
+  fallback?: ReactNode
+  children: ReactNode
 }
 
 export function PermissionGate({
@@ -91,7 +91,7 @@ export function PermissionGate({
   requireAll = false,
   fallback = null,
   children,
-}: PermissionGateProps) {
+}: PermissionGateProps): ReactNode {
   const { hasPermission, hasAnyPermission, hasAllPermissions, isLoading } = useRBAC()
 
   if (isLoading) {
@@ -106,7 +106,7 @@ export function PermissionGate({
     hasAccess = requireAll ? hasAllPermissions(permissions) : hasAnyPermission(permissions)
   }
 
-  return hasAccess ? <>{children}</> : <>{fallback}</>
+  return hasAccess ? children : fallback
 }
 
 /**
@@ -114,11 +114,11 @@ export function PermissionGate({
  */
 interface RoleGateProps {
   roles: Role[]
-  fallback?: React.ReactNode
-  children: React.ReactNode
+  fallback?: ReactNode
+  children: ReactNode
 }
 
-export function RoleGate({ roles, fallback = null, children }: RoleGateProps) {
+export function RoleGate({ roles, fallback = null, children }: RoleGateProps): ReactNode {
   const { role, isLoading } = useRBAC()
 
   if (isLoading) {
@@ -127,23 +127,23 @@ export function RoleGate({ roles, fallback = null, children }: RoleGateProps) {
 
   const hasRole = roles.includes(role)
 
-  return hasRole ? <>{children}</> : <>{fallback}</>
+  return hasRole ? children : fallback
 }
 
 /**
  * Admin-only rendering
  */
 interface AdminOnlyProps {
-  fallback?: React.ReactNode
-  children: React.ReactNode
+  fallback?: ReactNode
+  children: ReactNode
 }
 
-export function AdminOnly({ fallback = null, children }: AdminOnlyProps) {
+export function AdminOnly({ fallback = null, children }: AdminOnlyProps): ReactNode {
   const { isAdmin, isLoading } = useRBAC()
 
   if (isLoading) {
     return null
   }
 
-  return isAdmin ? <>{children}</> : <>{fallback}</>
+  return isAdmin ? children : fallback
 }
