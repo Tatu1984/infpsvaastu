@@ -66,7 +66,7 @@ export default function ContactPage() {
     const result = contactSchema.safeParse(formData)
     if (!result.success) {
       const fieldErrors: FormErrors = {}
-      result.error.errors.forEach((err) => {
+      result.error.issues.forEach((err) => {
         const field = err.path[0] as keyof FormErrors
         if (!fieldErrors[field]) {
           fieldErrors[field] = err.message
