@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import prisma from "@/lib/prisma"
 
+export const metadata = {
+  title: "Home Loans | INFPSVaastu",
+  description: "Compare home loan interest rates from top banks. Use our EMI calculator and find the best deal for your dream home.",
+}
+
 async function getLoans() {
   try {
     return await prisma.loan.findMany({

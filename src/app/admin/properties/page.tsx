@@ -30,6 +30,7 @@ import {
   Square,
   X,
 } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
 import { formatPrice } from "@/lib/utils"
 
 interface Property {
@@ -78,6 +79,8 @@ export default function AdminPropertiesPage() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [showViewModal, setShowViewModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(12)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -154,6 +157,18 @@ export default function AdminPropertiesPage() {
     const matchesType = filterType === "ALL" || property.listingType === filterType
     return matchesSearch && matchesStatus && matchesType
   })
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage)
+  const paginatedProperties = filteredProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterStatus, filterType])
 
   const handleApprove = async (id: string) => {
     try {
@@ -329,8 +344,8 @@ export default function AdminPropertiesPage() {
 
       {/* Properties Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.length > 0 ? (
-          filteredProperties.map((property) => {
+        {paginatedProperties.length > 0 ? (
+          paginatedProperties.map((property) => {
             const images = property.images ? JSON.parse(property.images) : []
             return (
               <div
@@ -457,6 +472,23 @@ export default function AdminPropertiesPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {filteredProperties.length > 0 && (
+        <div className="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredProperties.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(perPage) => {
+              setItemsPerPage(perPage)
+              setCurrentPage(1)
+            }}
+          />
+        </div>
+      )}
     </AdminLayout>
   )
 }

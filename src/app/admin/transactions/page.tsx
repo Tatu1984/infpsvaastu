@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import AdminLayout from "@/components/admin/AdminLayout"
 import { Receipt, Search, Filter, Eye, Download, Calendar, User, Building2 } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
 
 interface Transaction {
   id: string
@@ -23,6 +24,8 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("ALL")
   const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   useEffect(() => {
     fetchTransactions()
@@ -49,6 +52,18 @@ export default function TransactionsPage() {
       t.id.includes(searchQuery)
     return matchesFilter && matchesSearch
   })
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filter])
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -149,7 +164,7 @@ export default function TransactionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredTransactions.map((transaction) => (
+                {paginatedTransactions.map((transaction) => (
                   <tr key={transaction.id} className="hover:bg-slate-50">
                     <td className="px-6 py-4">
                       <span className="font-mono text-sm text-slate-600">#{transaction.id.slice(0, 8)}</span>
@@ -186,6 +201,19 @@ export default function TransactionsPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredTransactions.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={(perPage) => {
+                setItemsPerPage(perPage)
+                setCurrentPage(1)
+              }}
+            />
           </div>
         )}
       </div>

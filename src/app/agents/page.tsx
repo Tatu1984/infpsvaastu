@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import prisma from "@/lib/prisma"
 
+export const metadata = {
+  title: "Real Estate Agents | INFPSVaastu",
+  description: "Connect with verified real estate professionals who can help you buy, sell, or rent properties across India.",
+}
+
 async function getAgents() {
   try {
     return await prisma.agentProfile.findMany({

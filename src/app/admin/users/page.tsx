@@ -26,6 +26,7 @@ import {
   Building2,
   X,
 } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
 
 interface User {
   id: string
@@ -63,6 +64,8 @@ export default function AdminUsersPage() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -157,6 +160,18 @@ export default function AdminUsersPage() {
     return matchesSearch && matchesType
   })
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterType])
+
   if (status === "loading" || loading) {
     return (
       <AdminLayout title="Manage Members" breadcrumbs={[{ name: "Members" }]}>
@@ -175,11 +190,11 @@ export default function AdminUsersPage() {
     <AdminLayout title="Manage Members" breadcrumbs={[{ name: "Members" }]}>
       {/* View User Modal */}
       {showViewModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="view-user-title">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">User Details</h3>
-              <button onClick={() => setShowViewModal(false)} className="p-1 hover:bg-slate-100 rounded">
+              <h3 id="view-user-title" className="text-lg font-bold">User Details</h3>
+              <button onClick={() => setShowViewModal(false)} className="p-1 hover:bg-slate-100 rounded" aria-label="Close dialog">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -234,10 +249,10 @@ export default function AdminUsersPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="alertdialog" aria-modal="true" aria-labelledby="delete-user-title" aria-describedby="delete-user-desc">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold mb-2">Delete User</h3>
-            <p className="text-slate-600 mb-4">
+            <h3 id="delete-user-title" className="text-lg font-bold mb-2">Delete User</h3>
+            <p id="delete-user-desc" className="text-slate-600 mb-4">
               Are you sure you want to delete <strong>{selectedUser.name}</strong>? This action cannot be undone.
             </p>
             <div className="flex gap-3">
@@ -263,13 +278,14 @@ export default function AdminUsersPage() {
           <div className="flex flex-1 gap-4">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" aria-hidden="true" />
               <input
                 type="text"
                 placeholder="Search by name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Search users by name or email"
               />
             </div>
             {/* Filter */}
@@ -278,6 +294,7 @@ export default function AdminUsersPage() {
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
                 className="appearance-none pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Filter by user type"
               >
                 <option value="ALL">All Types</option>
                 <option value="INDIVIDUAL">Individual</option>
@@ -372,8 +389,8 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => {
+              {paginatedUsers.length > 0 ? (
+                paginatedUsers.map((user) => {
                   const TypeIcon = userTypeIcons[user.userType] || Users
                   return (
                     <tr key={user.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
@@ -437,19 +454,19 @@ export default function AdminUsersPage() {
                           <button
                             onClick={() => { setSelectedUser(user); setShowViewModal(true); }}
                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                            title="View"
+                            aria-label={`View ${user.name}`}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <Link href={`/admin/users/${user.id}/edit`}>
-                            <button className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="Edit">
+                            <button className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" aria-label={`Edit ${user.name}`}>
                               <Edit2 className="w-4 h-4" />
                             </button>
                           </Link>
                           <button
                             onClick={() => { setSelectedUser(user); setShowDeleteModal(true); }}
                             className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title="Delete"
+                            aria-label={`Delete ${user.name}`}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -472,22 +489,17 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Pagination */}
-        {filteredUsers.length > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-            <p className="text-sm text-slate-500">
-              Showing <span className="font-medium">{filteredUsers.length}</span> of{" "}
-              <span className="font-medium">{users.length}</span> users
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled>
-                Previous
-              </Button>
-              <Button variant="outline" size="sm" disabled>
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredUsers.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(perPage) => {
+            setItemsPerPage(perPage)
+            setCurrentPage(1)
+          }}
+        />
       </div>
     </AdminLayout>
   )

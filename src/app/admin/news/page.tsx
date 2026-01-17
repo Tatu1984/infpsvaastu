@@ -7,6 +7,7 @@ import Link from "next/link"
 import AdminLayout from "@/components/admin/AdminLayout"
 import { Button } from "@/components/ui/button"
 import { Plus, Edit2, Trash2, Eye, Newspaper, Globe, EyeOff } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
 
 interface News {
   id: string
@@ -23,6 +24,15 @@ export default function AdminNewsPage() {
   const router = useRouter()
   const [news, setNews] = useState<News[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  // Pagination calculations
+  const totalPages = Math.ceil(news.length / itemsPerPage)
+  const paginatedNews = news.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -132,7 +142,7 @@ export default function AdminNewsPage() {
             </tr>
           </thead>
           <tbody>
-            {news.map((article) => (
+            {paginatedNews.map((article) => (
               <tr key={article.id} className="border-b hover:bg-slate-50">
                 <td className="py-4 px-6">
                   <p className="font-medium">{article.title}</p>
@@ -157,18 +167,19 @@ export default function AdminNewsPage() {
                 <td className="py-4 px-6">
                   <div className="flex justify-end gap-2">
                     <Link href={`/news/${article.slug}`} target="_blank">
-                      <button className="p-2 hover:bg-blue-100 rounded-lg">
+                      <button className="p-2 hover:bg-blue-100 rounded-lg" aria-label={`View ${article.title}`}>
                         <Eye className="w-4 h-4 text-blue-600" />
                       </button>
                     </Link>
                     <Link href={`/admin/news/${article.id}/edit`}>
-                      <button className="p-2 hover:bg-amber-100 rounded-lg">
+                      <button className="p-2 hover:bg-amber-100 rounded-lg" aria-label={`Edit ${article.title}`}>
                         <Edit2 className="w-4 h-4 text-amber-600" />
                       </button>
                     </Link>
                     <button
                       onClick={() => handleDelete(article.id)}
                       className="p-2 hover:bg-red-100 rounded-lg"
+                      aria-label={`Delete ${article.title}`}
                     >
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </button>
@@ -188,6 +199,19 @@ export default function AdminNewsPage() {
             </Link>
           </div>
         )}
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={news.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(perPage) => {
+            setItemsPerPage(perPage)
+            setCurrentPage(1)
+          }}
+        />
       </div>
     </AdminLayout>
   )

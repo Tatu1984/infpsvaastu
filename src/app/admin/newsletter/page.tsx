@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import AdminLayout from "@/components/admin/AdminLayout"
 import { Button } from "@/components/ui/button"
 import { Search, Trash2, Download, Mail, Users, CheckCircle, XCircle } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
 
 interface Subscriber {
   id: string
@@ -20,6 +21,8 @@ export default function AdminNewsletterPage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -97,6 +100,18 @@ export default function AdminNewsletterPage() {
     s.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredSubscribers.length / itemsPerPage)
+  const paginatedSubscribers = filteredSubscribers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery])
+
   if (status === "loading" || loading) {
     return (
       <AdminLayout title="Newsletter Subscribers" breadcrumbs={[{ name: "Newsletter" }]}>
@@ -172,7 +187,7 @@ export default function AdminNewsletterPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredSubscribers.map((subscriber) => (
+            {paginatedSubscribers.map((subscriber) => (
               <tr key={subscriber.id} className="border-b hover:bg-slate-50">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-2">
@@ -214,6 +229,19 @@ export default function AdminNewsletterPage() {
             <p className="text-slate-500">No subscribers found</p>
           </div>
         )}
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredSubscribers.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(perPage) => {
+            setItemsPerPage(perPage)
+            setCurrentPage(1)
+          }}
+        />
       </div>
     </AdminLayout>
   )

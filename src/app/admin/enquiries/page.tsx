@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import AdminLayout from "@/components/admin/AdminLayout"
 import { Button } from "@/components/ui/button"
 import { Search, Eye, Trash2, Mail, Phone, Calendar, MessageSquare, X, CheckCircle } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
 
 interface Inquiry {
   id: string
@@ -29,6 +30,8 @@ export default function AdminEnquiriesPage() {
   const [filterStatus, setFilterStatus] = useState("ALL")
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -95,6 +98,18 @@ export default function AdminEnquiriesPage() {
     const matchesStatus = filterStatus === "ALL" || inquiry.status === filterStatus
     return matchesSearch && matchesStatus
   })
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredInquiries.length / itemsPerPage)
+  const paginatedInquiries = filteredInquiries.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterStatus])
 
   const statusColors: Record<string, string> = {
     PENDING: "bg-amber-100 text-amber-700",
@@ -244,7 +259,7 @@ export default function AdminEnquiriesPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredInquiries.map((inquiry) => (
+            {paginatedInquiries.map((inquiry) => (
               <tr key={inquiry.id} className="border-b hover:bg-slate-50">
                 <td className="py-4 px-6">
                   <p className="font-medium">{inquiry.name}</p>
@@ -291,6 +306,19 @@ export default function AdminEnquiriesPage() {
             <p className="text-slate-500">No enquiries found</p>
           </div>
         )}
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredInquiries.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(perPage) => {
+            setItemsPerPage(perPage)
+            setCurrentPage(1)
+          }}
+        />
       </div>
     </AdminLayout>
   )

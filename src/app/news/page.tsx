@@ -4,6 +4,11 @@ import { Newspaper, Calendar, ArrowRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import prisma from "@/lib/prisma"
 
+export const metadata = {
+  title: "Real Estate News | INFPSVaastu",
+  description: "Stay updated with the latest news, trends, and insights from the real estate market.",
+}
+
 async function getNews() {
   try {
     return await prisma.news.findMany({

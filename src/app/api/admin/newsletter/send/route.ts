@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { logger } from "@/lib/logger"
 
 export async function GET() {
   try {
@@ -19,7 +20,7 @@ export async function GET() {
       count: subscribers.length,
     })
   } catch (error) {
-    console.error("Error:", error)
+    logger.error("Newsletter operation failed", error)
     return NextResponse.json({ error: "Failed to fetch subscribers" }, { status: 500 })
   }
 }
@@ -42,9 +43,11 @@ export async function POST(request: Request) {
       : recipients.length
 
     // Log the newsletter send attempt
-    console.log(`Newsletter sent to ${subscriberCount} subscribers`)
-    console.log(`Subject: ${subject}`)
-    console.log(`Content: ${content.substring(0, 100)}...`)
+    logger.info("Newsletter sent", {
+      subscriberCount,
+      subject,
+      contentPreview: content.substring(0, 100),
+    })
 
     return NextResponse.json({
       success: true,
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
       sentTo: subscriberCount,
     })
   } catch (error) {
-    console.error("Error:", error)
+    logger.error("Newsletter operation failed", error)
     return NextResponse.json({ error: "Failed to send newsletter" }, { status: 500 })
   }
 }

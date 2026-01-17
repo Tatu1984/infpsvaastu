@@ -19,6 +19,7 @@ import {
   Star,
   X,
 } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
 
 interface Project {
   id: string
@@ -53,6 +54,8 @@ export default function AdminProjectsPage() {
   const [filterStatus, setFilterStatus] = useState("ALL")
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(12)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -119,6 +122,18 @@ export default function AdminProjectsPage() {
     const matchesStatus = filterStatus === "ALL" || project.status === filterStatus
     return matchesSearch && matchesStatus
   })
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage)
+  const paginatedProjects = filteredProjects.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterStatus])
 
   if (status === "loading" || loading) {
     return (
@@ -208,7 +223,7 @@ export default function AdminProjectsPage() {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProjects.map((project) => (
+        {paginatedProjects.map((project) => (
           <div key={project.id} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
             <div className="flex justify-between items-start mb-3">
               <div>
@@ -270,6 +285,23 @@ export default function AdminProjectsPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {filteredProjects.length > 0 && (
+        <div className="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredProjects.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(perPage) => {
+              setItemsPerPage(perPage)
+              setCurrentPage(1)
+            }}
+          />
+        </div>
+      )}
     </AdminLayout>
   )
 }

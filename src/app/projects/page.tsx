@@ -6,6 +6,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import prisma from "@/lib/prisma"
 
+export const metadata = {
+  title: "Builder Projects | INFPSVaastu",
+  description: "Discover residential and commercial projects from India's top builders. Find your perfect home in a new development.",
+}
+
 async function getProjects() {
   try {
     return await prisma.project.findMany({
