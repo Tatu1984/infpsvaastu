@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import React, { useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { RBAC, createRBAC, type Permission, type Role } from "@/lib/rbac"
 
@@ -58,23 +58,20 @@ export function useRBAC() {
 export function withPermission<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   requiredPermission: Permission
-): React.FC<P> {
-  const PermissionGatedComponent: React.FC<P> = (props: P) => {
+) {
+  return function PermissionGatedComponent(props: P) {
     const { hasPermission, isLoading } = useRBAC()
 
     if (isLoading) {
-      return null // Or a loading spinner
+      return null
     }
 
     if (!hasPermission(requiredPermission)) {
-      return null // Or an unauthorized message
+      return null
     }
 
-    const Component = WrappedComponent
-    return <Component {...props} />
+    return React.createElement(WrappedComponent, props)
   }
-
-  return PermissionGatedComponent
 }
 
 /**
