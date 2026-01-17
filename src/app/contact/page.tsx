@@ -39,7 +39,7 @@ export default function ContactPage() {
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setErrors((prev) => ({ ...prev, [name]: error.errors[0].message }))
+        setErrors((prev) => ({ ...prev, [name]: error.issues[0].message }))
       }
     }
   }
