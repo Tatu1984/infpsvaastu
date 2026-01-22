@@ -477,15 +477,32 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   <CardTitle>Property Video</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <a
-                    href={property.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:underline"
-                  >
-                    <Play className="w-5 h-5" />
-                    Watch Property Video
-                  </a>
+                  {property.videoUrl.includes('youtube.com') || property.videoUrl.includes('youtu.be') ? (
+                    <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${
+                          property.videoUrl.includes('youtu.be')
+                            ? property.videoUrl.split('/').pop()?.split('?')[0]
+                            : new URL(property.videoUrl).searchParams.get('v')
+                        }`}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="Property Video"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video rounded-lg overflow-hidden bg-gray-900">
+                      <video
+                        src={property.videoUrl}
+                        controls
+                        className="w-full h-full"
+                        poster={images[0] || undefined}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

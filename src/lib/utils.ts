@@ -6,13 +6,36 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(price: number): string {
+  const formatted = `₹${price.toLocaleString('en-IN')}`
+
   if (price >= 10000000) {
-    return `₹${(price / 10000000).toFixed(2)} Cr`
+    const crores = price / 10000000
+    const croreStr = crores % 1 === 0 ? crores.toFixed(0) : crores.toFixed(2).replace(/\.?0+$/, '')
+    return `${formatted} (${croreStr} Cr)`
   } else if (price >= 100000) {
-    return `₹${(price / 100000).toFixed(2)} Lac`
-  } else {
-    return `₹${price.toLocaleString('en-IN')}`
+    const lacs = price / 100000
+    const lacStr = lacs % 1 === 0 ? lacs.toFixed(0) : lacs.toFixed(2).replace(/\.?0+$/, '')
+    return `${formatted} (${lacStr} Lac)`
+  } else if (price >= 1000) {
+    const thousands = price / 1000
+    const thousandStr = thousands % 1 === 0 ? thousands.toFixed(0) : thousands.toFixed(2).replace(/\.?0+$/, '')
+    return `${formatted} (${thousandStr}K)`
   }
+  return formatted
+}
+
+export function formatPriceInput(value: string): string {
+  // Remove non-digits
+  const digits = value.replace(/[^0-9]/g, '')
+  if (!digits) return ''
+  // Format with Indian commas
+  const num = parseInt(digits, 10)
+  return num.toLocaleString('en-IN')
+}
+
+export function parsePriceInput(value: string): string {
+  // Remove commas to get raw number
+  return value.replace(/,/g, '')
 }
 
 export function formatArea(area: number): string {

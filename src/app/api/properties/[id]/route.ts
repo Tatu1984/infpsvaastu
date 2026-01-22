@@ -128,9 +128,9 @@ export async function PUT(
         pricePerSqft: body.pricePerSqft,
         maintenance: body.maintenance,
         securityDeposit: body.securityDeposit,
-        images: body.images ? JSON.stringify(body.images) : null,
-        videoUrl: body.videoUrl,
-        amenities: body.amenities ? JSON.stringify(body.amenities) : null,
+        images: body.images || null,
+        videoUrl: body.videoUrl || null,
+        amenities: body.amenities || null,
         availableFrom: body.availableFrom ? new Date(body.availableFrom) : null,
       },
     })

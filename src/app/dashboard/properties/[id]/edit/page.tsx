@@ -1,14 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, use } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import {
   Home,
   MapPin,
   Bed,
-  Bath,
-  Maximize,
   IndianRupee,
   Camera,
   ChevronRight,
@@ -17,12 +15,14 @@ import {
   Upload,
   X,
   Loader2,
+  ArrowLeft,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImageUpload } from "@/components/upload/ImageUpload"
 import { formatPriceInput, parsePriceInput } from "@/lib/utils"
+import Link from "next/link"
 
 const propertyTypes = [
   "APARTMENT",
@@ -58,11 +58,13 @@ const amenitiesList = [
   "CCTV",
 ]
 
-export default function PostPropertyPage() {
+export default function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
   const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [videoUploading, setVideoUploading] = useState(false)
   const [formData, setFormData] = useState({
     // Basic Info
@@ -105,9 +107,72 @@ export default function PostPropertyPage() {
     availableFrom: "",
   })
 
-  if (status === "unauthenticated") {
-    router.push("/login")
-    return null
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+      return
+    }
+
+    if (status === "authenticated") {
+      fetchProperty()
+    }
+  }, [status, resolvedParams.id])
+
+  const fetchProperty = async () => {
+    try {
+      const response = await fetch(`/api/properties/${resolvedParams.id}`)
+      if (!response.ok) {
+        router.push("/dashboard/properties")
+        return
+      }
+      const data = await response.json()
+      const property = data.property
+
+      // Check if user owns this property
+      if (property.userId !== session?.user?.id) {
+        router.push("/dashboard/properties")
+        return
+      }
+
+      // Parse JSON fields
+      const images = property.images ? JSON.parse(property.images) : []
+      const amenities = property.amenities ? JSON.parse(property.amenities) : []
+
+      setFormData({
+        listingType: property.listingType || "SELL",
+        propertyType: property.propertyType || "APARTMENT",
+        title: property.title || "",
+        description: property.description || "",
+        address: property.address || "",
+        locality: property.locality || "",
+        city: property.city || "",
+        state: property.state || "",
+        pincode: property.pincode || "",
+        bedrooms: property.bedrooms?.toString() || "",
+        bathrooms: property.bathrooms?.toString() || "",
+        balconies: property.balconies?.toString() || "",
+        floorNumber: property.floorNumber?.toString() || "",
+        totalFloors: property.totalFloors?.toString() || "",
+        facing: property.facing || "",
+        furnishing: property.furnishing || "UNFURNISHED",
+        builtUpArea: property.builtUpArea?.toString() || "",
+        carpetArea: property.carpetArea?.toString() || "",
+        plotArea: property.plotArea?.toString() || "",
+        price: property.price?.toString() || "",
+        pricePerSqft: property.pricePerSqft?.toString() || "",
+        maintenance: property.maintenance?.toString() || "",
+        securityDeposit: property.securityDeposit?.toString() || "",
+        amenities,
+        images,
+        videoUrl: property.videoUrl || "",
+        availableFrom: property.availableFrom ? property.availableFrom.split("T")[0] : "",
+      })
+    } catch (error) {
+      console.error("Error fetching property:", error)
+      router.push("/dashboard/properties")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleChange = (
@@ -132,28 +197,28 @@ export default function PostPropertyPage() {
   }
 
   const getDisplayPrice = (value: string): string => {
-    if (!value) return ''
+    if (!value) return ""
     return formatPriceInput(value)
   }
 
   const getPriceHint = (value: string): string => {
-    if (!value) return ''
+    if (!value) return ""
     const num = parseInt(value, 10)
-    if (isNaN(num) || num === 0) return ''
+    if (isNaN(num) || num === 0) return ""
     if (num >= 10000000) {
       const cr = num / 10000000
-      const crStr = cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2).replace(/\.?0+$/, '')
+      const crStr = cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2).replace(/\.?0+$/, "")
       return `= ${crStr} Crore`
     } else if (num >= 100000) {
       const lac = num / 100000
-      const lacStr = lac % 1 === 0 ? lac.toFixed(0) : lac.toFixed(2).replace(/\.?0+$/, '')
+      const lacStr = lac % 1 === 0 ? lac.toFixed(0) : lac.toFixed(2).replace(/\.?0+$/, "")
       return `= ${lacStr} Lac`
     } else if (num >= 1000) {
       const k = num / 1000
-      const kStr = k % 1 === 0 ? k.toFixed(0) : k.toFixed(2).replace(/\.?0+$/, '')
+      const kStr = k % 1 === 0 ? k.toFixed(0) : k.toFixed(2).replace(/\.?0+$/, "")
       return `= ${kStr} Thousand`
     }
-    return ''
+    return ""
   }
 
   const handleImagesChange = (urls: string[]) => {
@@ -164,50 +229,48 @@ export default function PostPropertyPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validate video file
-    if (!file.type.startsWith('video/')) {
-      alert('Please select a video file')
+    if (!file.type.startsWith("video/")) {
+      alert("Please select a video file")
       return
     }
 
-    // Limit to 100MB
     if (file.size > 100 * 1024 * 1024) {
-      alert('Video must be less than 100MB')
+      alert("Video must be less than 100MB")
       return
     }
 
     setVideoUploading(true)
     try {
       const formData = new FormData()
-      formData.append('file', file)
-      formData.append('category', 'properties')
+      formData.append("file", file)
+      formData.append("category", "properties")
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
+      const response = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
       })
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Upload failed')
+        throw new Error(data.error || "Upload failed")
       }
 
       const data = await response.json()
       setFormData((prev) => ({ ...prev, videoUrl: data.url }))
     } catch (error) {
-      console.error('Video upload error:', error)
-      alert('Failed to upload video')
+      console.error("Video upload error:", error)
+      alert("Failed to upload video")
     } finally {
       setVideoUploading(false)
-      e.target.value = ''
+      e.target.value = ""
     }
   }
 
   const handleSubmit = async () => {
-    setLoading(true)
+    setSaving(true)
     try {
-      const response = await fetch("/api/properties", {
-        method: "POST",
+      const response = await fetch(`/api/properties/${resolvedParams.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -223,23 +286,22 @@ export default function PostPropertyPage() {
           pricePerSqft: formData.pricePerSqft ? parseFloat(formData.pricePerSqft) : null,
           maintenance: formData.maintenance ? parseFloat(formData.maintenance) : null,
           securityDeposit: formData.securityDeposit ? parseFloat(formData.securityDeposit) : null,
-          // Convert arrays to JSON strings for DB storage
           images: formData.images.length > 0 ? JSON.stringify(formData.images) : null,
           amenities: formData.amenities.length > 0 ? JSON.stringify(formData.amenities) : null,
         }),
       })
 
       if (response.ok) {
-        router.push("/dashboard/properties?created=true")
+        router.push("/dashboard/properties?updated=true")
       } else {
         const data = await response.json()
-        alert(data.error || "Failed to create property")
+        alert(data.error || "Failed to update property")
       }
     } catch (error) {
-      console.error("Error creating property:", error)
-      alert("Failed to create property")
+      console.error("Error updating property:", error)
+      alert("Failed to update property")
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
@@ -250,30 +312,46 @@ export default function PostPropertyPage() {
     { id: 4, title: "Price & Photos" },
   ]
 
+  if (status === "loading" || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
+
+  if (!session?.user) return null
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Post Your Property</h1>
-          <p className="text-gray-600 mt-1">
-            Fill in the details to list your property on INFPSVaastu
-          </p>
+          <Link
+            href="/dashboard/properties"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Properties
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Property</h1>
+          <p className="text-gray-600 mt-1">Update your property listing details</p>
         </div>
 
         {/* Progress Steps */}
         <div className="flex items-center justify-between mb-8">
           {steps.map((s, index) => (
             <div key={s.id} className="flex items-center">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-medium ${
+              <button
+                onClick={() => setStep(s.id)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-colors ${
                   step >= s.id
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-500"
+                    : "bg-gray-200 text-gray-500 hover:bg-gray-300"
                 }`}
               >
                 {step > s.id ? <Check className="w-5 h-5" /> : s.id}
-              </div>
+              </button>
               <span
                 className={`ml-2 text-sm hidden sm:inline ${
                   step >= s.id ? "text-blue-600 font-medium" : "text-gray-500"
@@ -307,9 +385,7 @@ export default function PostPropertyPage() {
                   {listingTypes.map((type) => (
                     <button
                       key={type.id}
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, listingType: type.id }))
-                      }
+                      onClick={() => setFormData((prev) => ({ ...prev, listingType: type.id }))}
                       className={`flex-1 py-3 rounded-lg border-2 font-medium transition-colors ${
                         formData.listingType === type.id
                           ? "border-blue-600 bg-blue-50 text-blue-600"
@@ -331,9 +407,7 @@ export default function PostPropertyPage() {
                   {propertyTypes.map((type) => (
                     <button
                       key={type}
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, propertyType: type }))
-                      }
+                      onClick={() => setFormData((prev) => ({ ...prev, propertyType: type }))}
                       className={`py-3 rounded-lg border-2 font-medium transition-colors ${
                         formData.propertyType === type
                           ? "border-blue-600 bg-blue-50 text-blue-600"
@@ -361,9 +435,7 @@ export default function PostPropertyPage() {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
                   name="description"
                   rows={4}
@@ -374,11 +446,7 @@ export default function PostPropertyPage() {
                 />
               </div>
 
-              <Button
-                className="w-full"
-                onClick={() => setStep(2)}
-                disabled={!formData.title}
-              >
+              <Button className="w-full" onClick={() => setStep(2)} disabled={!formData.title}>
                 Continue
               </Button>
             </CardContent>
@@ -396,9 +464,7 @@ export default function PostPropertyPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
                 <Input
                   name="address"
                   placeholder="Flat No, Building Name, Street"
@@ -408,9 +474,7 @@ export default function PostPropertyPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Locality *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Locality *</label>
                 <Input
                   name="locality"
                   placeholder="e.g., Whitefield"
@@ -421,9 +485,7 @@ export default function PostPropertyPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
                   <Input
                     name="city"
                     placeholder="e.g., Bangalore"
@@ -432,9 +494,7 @@ export default function PostPropertyPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
                   <Input
                     name="state"
                     placeholder="e.g., Karnataka"
@@ -445,9 +505,7 @@ export default function PostPropertyPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pincode
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
                 <Input
                   name="pincode"
                   placeholder="e.g., 560066"
@@ -484,9 +542,7 @@ export default function PostPropertyPage() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bedrooms
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
                   <Input
                     name="bedrooms"
                     type="number"
@@ -496,9 +552,7 @@ export default function PostPropertyPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bathrooms
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
                   <Input
                     name="bathrooms"
                     type="number"
@@ -508,9 +562,7 @@ export default function PostPropertyPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Balconies
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Balconies</label>
                   <Input
                     name="balconies"
                     type="number"
@@ -550,9 +602,7 @@ export default function PostPropertyPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Facing
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Facing</label>
                   <select
                     name="facing"
                     value={formData.facing}
@@ -568,9 +618,7 @@ export default function PostPropertyPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Furnishing
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing</label>
                   <select
                     name="furnishing"
                     value={formData.furnishing}
@@ -627,9 +675,7 @@ export default function PostPropertyPage() {
 
               {/* Amenities */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Amenities
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
                 <div className="grid grid-cols-3 gap-2">
                   {amenitiesList.map((amenity) => (
                     <button
@@ -670,9 +716,7 @@ export default function PostPropertyPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price (₹) *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price (₹) *</label>
                 <Input
                   name="price"
                   type="text"
@@ -733,7 +777,7 @@ export default function PostPropertyPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Camera className="w-4 h-4 inline mr-1" />
-                  Property Photos *
+                  Property Photos
                 </label>
                 <p className="text-sm text-gray-500 mb-3">
                   Upload up to 10 photos. First image will be the primary/cover image.
@@ -762,18 +806,14 @@ export default function PostPropertyPage() {
                     <div className="flex items-center gap-3">
                       <Video className="w-10 h-10 text-blue-600" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          Video uploaded
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {formData.videoUrl}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900 truncate">Video uploaded</p>
+                        <p className="text-xs text-gray-500 truncate">{formData.videoUrl}</p>
                       </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => setFormData((prev) => ({ ...prev, videoUrl: '' }))}
+                        onClick={() => setFormData((prev) => ({ ...prev, videoUrl: "" }))}
                         className="text-red-600 hover:text-red-700"
                       >
                         <X className="w-4 h-4" />
@@ -791,9 +831,13 @@ export default function PostPropertyPage() {
                         disabled={videoUploading}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                       />
-                      <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                        videoUploading ? 'bg-gray-100 border-gray-300' : 'border-gray-300 hover:border-blue-400'
-                      }`}>
+                      <div
+                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                          videoUploading
+                            ? "bg-gray-100 border-gray-300"
+                            : "border-gray-300 hover:border-blue-400"
+                        }`}
+                      >
                         {videoUploading ? (
                           <div className="flex flex-col items-center">
                             <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-2" />
@@ -832,9 +876,9 @@ export default function PostPropertyPage() {
                 <Button
                   className="flex-1"
                   onClick={handleSubmit}
-                  disabled={loading || !formData.price}
+                  disabled={saving || !formData.price}
                 >
-                  {loading ? "Submitting..." : "Submit Property"}
+                  {saving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </CardContent>
