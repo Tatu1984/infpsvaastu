@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, use } from "react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import AdminLayout from "@/components/admin/AdminLayout"
 import { Button } from "@/components/ui/button"
@@ -9,9 +10,12 @@ import Link from "next/link"
 import { ImageUpload } from "@/components/upload/ImageUpload"
 import { formatPriceInput, parsePriceInput } from "@/lib/utils"
 
-export default function AddPropertyPage() {
+export default function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [videoUploading, setVideoUploading] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
@@ -32,6 +36,59 @@ export default function AddPropertyPage() {
     images: [] as string[],
     videoUrl: "",
   })
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+    } else if (session?.user?.userType !== "ADMIN") {
+      router.push("/admin")
+    }
+  }, [status, session, router])
+
+  useEffect(() => {
+    if (session?.user?.userType === "ADMIN") {
+      fetchProperty()
+    }
+  }, [session, resolvedParams.id])
+
+  const fetchProperty = async () => {
+    try {
+      const response = await fetch(`/api/properties/${resolvedParams.id}`)
+      if (!response.ok) {
+        router.push("/admin/properties")
+        return
+      }
+      const data = await response.json()
+      const property = data.property
+
+      const images = property.images ? JSON.parse(property.images) : []
+
+      setFormData({
+        title: property.title || "",
+        description: property.description || "",
+        propertyType: property.propertyType || "APARTMENT",
+        listingType: property.listingType || "SELL",
+        address: property.address || "",
+        locality: property.locality || "",
+        city: property.city || "",
+        state: property.state || "",
+        pincode: property.pincode || "",
+        bedrooms: property.bedrooms?.toString() || "",
+        bathrooms: property.bathrooms?.toString() || "",
+        builtUpArea: property.builtUpArea?.toString() || "",
+        price: property.price?.toString() || "",
+        status: property.status || "ACTIVE",
+        listingTier: property.listingTier || "BASIC",
+        images,
+        videoUrl: property.videoUrl || "",
+      })
+    } catch (error) {
+      console.error("Error fetching property:", error)
+      router.push("/admin/properties")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = parsePriceInput(e.target.value)
@@ -110,11 +167,11 @@ export default function AddPropertyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
 
     try {
-      const response = await fetch("/api/properties", {
-        method: "POST",
+      const response = await fetch(`/api/properties/${resolvedParams.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -131,18 +188,32 @@ export default function AddPropertyPage() {
         router.push("/admin/properties")
       } else {
         const data = await response.json()
-        alert(data.error || "Failed to create property")
+        alert(data.error || "Failed to update property")
       }
     } catch (error) {
-      console.error("Error creating property:", error)
-      alert("Failed to create property")
+      console.error("Error updating property:", error)
+      alert("Failed to update property")
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
+  if (status === "loading" || loading) {
+    return (
+      <AdminLayout title="Edit Listing" breadcrumbs={[{ name: "Listings", href: "/admin/properties" }, { name: "Edit" }]}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
+  if (session?.user?.userType !== "ADMIN") {
+    return null
+  }
+
   return (
-    <AdminLayout title="Add New Listing" breadcrumbs={[{ name: "Listings", href: "/admin/properties" }, { name: "Add New" }]}>
+    <AdminLayout title="Edit Listing" breadcrumbs={[{ name: "Listings", href: "/admin/properties" }, { name: "Edit" }]}>
       <div className="max-w-3xl">
         <Link href="/admin/properties" className="inline-flex items-center gap-2 text-slate-600 hover:text-blue-600 mb-6">
           <ArrowLeft className="w-4 h-4" />
@@ -369,6 +440,7 @@ export default function AddPropertyPage() {
                   <option value="PENDING">Pending</option>
                   <option value="ACTIVE">Active</option>
                   <option value="SOLD">Sold</option>
+                  <option value="EXPIRED">Expired</option>
                 </select>
               </div>
               <div>
@@ -494,11 +566,11 @@ export default function AddPropertyPage() {
             </Link>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={saving}
               className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               <Save className="w-4 h-4 mr-2" />
-              {loading ? "Creating..." : "Create Listing"}
+              {saving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>
